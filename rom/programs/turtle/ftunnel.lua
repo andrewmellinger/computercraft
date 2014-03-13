@@ -1,3 +1,5 @@
+-- os.loadAPI("crush")
+-- os.loadAPI("/rom/programs/turtle/crush")
 local turtle = require "TurtleSim"
 --[[
 
@@ -15,6 +17,7 @@ function checkFuel()
   end
 end
 
+
 function digColumn()
   while turtle.detect() do
     turtle.dig()
@@ -24,34 +27,46 @@ function digColumn()
 end
 
 
-function checkTorch(counter)
+function checkTorch(counter, torchInterval)
+  if torchInterval == 0 then
+    return 0
+  end
+
   counter = counter - 1
   if counter == 0 then
     turtle.select(2)
     turtle.placeDown()
-    counter = 6
+    counter = torchInterval
   end
   return counter
 end
 
 
 function showHelp()
-  print("Usage: ftunnel <length>")
+  print("Usage: ftunnel <length> <torch_interval=8>")
+  print("Goes up, digs ahead and down, places torches on interval.")
+  print("If torchInterval == 0, then no torches are placed")
   print("  slot 1: coal")
-  print("  slot 2: torches or blocks")
+  print("  slot 2: torches")
 end
 
 
-function mainLoop(length)
+function mainLoop(length, torchInterval)
   print("Starting tunnel length: "..length)
-  torchit = 6
+  local torchCounter = torchInterval
+
+  -- Go high so we can make torch placement easy
   turtle.up()
+
   while (length > 0) do
     checkFuel()
     digColumn()
-    torchit = checkTorch(torchit)
+    torchCounter = checkTorch(torchCounter, torchInterval)
     length = length - 1
   end
+
+  -- Clear in case we placed a torch
+  turtle.digDown()
   turtle.down()
 end
 
@@ -62,7 +77,11 @@ if #tArgs < 1 then
   showHelp()
 else
   local length = tonumber( tArgs[1] )
-  mainLoop(length)
+  local torchInterval = 8
+  if #tArgs > 1
+    torchInterval = tonumber( tArgs[2] )
+  end
+  mainLoop(length, torchInterval)
 end
 print("Done")
 
