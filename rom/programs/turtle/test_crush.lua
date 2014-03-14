@@ -1,9 +1,10 @@
-
 -- Since these things are all global, we can load the TurtleSim
 -- before we laod crush and it works.
 turtle = require "TurtleSim"
 package.path = package.path..";../../apis/turtle/?.lua"
 local crush = require "crush"
+
+--TODO: Make this a function...
 
 -- Now 
 --checkFuel()
