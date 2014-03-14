@@ -1,9 +1,10 @@
 -- when in CC
 -- os.loadAPI("crush")
 -- crush.checkFuel()
+-- In loadAPI it seems to come in as an object automatically.
 
 REFUEL_LEVEL = 15
-REFULE_SLOT = 1
+REFUEL_SLOT = 1
 
 -- Used to reload fuel if needed
 function checkFuel()
@@ -51,6 +52,7 @@ end
 -- The function is passed a monotonically incrementing counter
 function digRow(length, up, down, fn)
   for i = 1,length do
+    checkFuel()
     digColumn(up, down)
     if fn ~= nil then
       fn(i)
@@ -59,14 +61,13 @@ function digRow(length, up, down, fn)
 end
 
 
--- Moves the turtle forward and executes the fn in each block as it moves.
+-- Moves the turtle forward and executes the fn in each block BEFORE as it moves.
 -- Each way to make a digger or torch placements.
 -- The function is passed a monotonically incrementing counter
 function fnOverRow(length, fn, counter)
-  checkFuel()
   for i = 1,length do
+    checkFuel()
     fn(counter)
-    digAll()
     turtle.forward()
     counter = counter + 1
   end
@@ -99,13 +100,11 @@ function outAndBack(length, width, right, fn)
   counter = fnOverRow(length, fn, counter)
 end
 
-
 -- A functions that clears out and back.  
 -- This is what pumpkins does
 function clearOutAndBack(length, width)
   outAndBack(length, width, true, function (x) turtle.dig() end)
 end
-
 
 -- Functions used to place torches on some interval.  Often passed
 -- in to the other movement loops.
@@ -155,26 +154,26 @@ function repeatIt(idx)
   
   -- Look for square bracked
   local bracket = idx + 1
-  while cctx_context.cmds:sub(bracket, bracket) ~= '[' do
+  while ccts_context.cmds:sub(bracket, bracket) ~= '[' do
     bracket = bracket + 1
   end
   
   -- Numeric/count portion
-  local count = tonumber(cctx_context.cmds:sub(idx + 1, bracket - 1))
+  local count = tonumber(ccts_context.cmds:sub(idx + 1, bracket - 1))
 
   while count > 0 do
     newIdx = bracket + 1
-    local cmd = cctx_context.cmds:sub(newIdx, newIdx)
+    local cmd = ccts_context.cmds:sub(newIdx, newIdx)
     while cmd ~= ']' do
       newIdx = dispatch(cmd, newIdx)
       newIdx = newIdx + 1
-      cmd = cctx_context.cmds:sub(newIdx, newIdx)
+      cmd = ccts_context.cmds:sub(newIdx, newIdx)
     end
     count = count - 1
   end
 
   -- This should be ending bracket
-  local tmp = cctx_context.cmds:sub(newIdx, newIdx)
+  local tmp = ccts_context.cmds:sub(newIdx, newIdx)
   if tmp ~= ']' then
     print("RepeatIt is not returning on ']', instead: "..tmp)
   end
@@ -186,7 +185,7 @@ end
 -- Specific to CCTS
 local function placeFront(idx)
   idx = idx + 1
-  local c = tonumber(cctx_context.cmds:sub(idx, idx))
+  local c = tonumber(ccts_context.cmds:sub(idx, idx))
   turtle.select(c)
   turtle.place()
   return idx
@@ -196,7 +195,7 @@ end
 -- Specific to CCTS
 local function placeUp(idx)
   idx = idx + 1
-  local c = tonumber(cctx_context.cmds:sub(idx, idx))
+  local c = tonumber(ccts_context.cmds:sub(idx, idx))
   turtle.select(c)
   turtle.placeUp()
   return idx
@@ -205,7 +204,7 @@ end
 
 -- Specific to CCTS
 local function ignoreComments(idx)
-  while cctx_context.cmds:sub(idx, idx) ~= "\n" do
+  while ccts_context.cmds:sub(idx, idx) ~= "\n" do
     idx = idx + 1
   end
   return idx
@@ -218,8 +217,8 @@ end
 -- Specific to CCTS
 -- TOOD:  Since we have IDX, do we really need sym?
 local function dispatch(idx)
-  local sym = cctx_context.cmds:sub(idx,idx)
-  func = cctx_context.funcs[sym]
+  local sym = ccts_context.cmds:sub(idx,idx)
+  func = ccts_context.funcs[sym]
   if func == nil then
     print("Failed to find function for: '" ..sym.."'")
   else

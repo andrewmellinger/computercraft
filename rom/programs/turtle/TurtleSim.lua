@@ -56,6 +56,7 @@ function turtleSim.forward()
   io.write("f")
   turtleSim.block = true
   turtleSim.blockDown = true
+  turtleSim.blockUp = true
   turtleSim.fuel = turtleSim.fuel - 1
 end
 
