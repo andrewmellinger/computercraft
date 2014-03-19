@@ -13,6 +13,46 @@ local turtleSim = {
   z = 0;
 }
 
+-- TODO:  Look at setfenv
+--[[
+
+http://www.lua.org/pil/15.4.html
+
+local P = {}
+complex = P
+setfenv(1, P)
+
+function add(c1, c2)
+  -- foo.
+end
+
+This supposedly creates it in complex
+
+
+
+]]
+
+-- Crush Loader
+-- Simply puts all the functions INTO a thing that looks like what
+-- it would look like in CC.
+function turtleSim.loadCrush()
+  package.path = package.path..";../../apis/turtle/?.lua"
+  require "crush"
+
+  crush = {}
+  crush.checkFuel = checkFuel
+  crush.digAll = digAll
+  crush.digAllUp = digAllUp
+  crush.digColumn = digColumn
+  crush.digRow = digRow
+  crush.ccts = ccts
+  crush.fnOverRow = fnOverRow
+  crush.turn = turn
+
+  return crush
+end
+
+
 MAX_X =  100;
 MIN_X = -100;
 MAX_Y =  10;
@@ -188,8 +228,6 @@ end
 function turtleSim.getItemCount(slot)
   return 2
 end
-
-
 
 
 -- Utilities

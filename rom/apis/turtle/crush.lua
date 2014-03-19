@@ -337,10 +337,8 @@ function getopt(optstring, ...)
 									yield(opt, args[i])
 									i = i + 1
 								elseif optstring:sub(1, 1) == ":" then
-                  print("egads")
 									yield(':', opt)
 								else
-                  print("woe!")
 									yield('?', opt)
 								end
 							else
@@ -379,7 +377,7 @@ end
 function overlayArgs(optstring, argTable, ...)
   -- TODO:  Stash leftovers...
 
-  for opt, arg in getopt(":l:w:t:n:r", ...) do
+  for opt, arg in getopt(optstring, ...) do
     if argTable[opt] ~= nil then
       if type(argTable[opt]) == "number" then
         -- If they had a number before, then do that

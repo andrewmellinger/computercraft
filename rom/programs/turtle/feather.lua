@@ -1,23 +1,26 @@
-local turtle = require "TurtleSim"
-package.path = package.path..";../../apis/turtle/?.lua"
-local crush = require "crush"
+-- First two lines are for PC, the last one is for MC.
+turtle = require "TurtleSim"
+local crush = turtle.loadCrush()
+-- os.loadAPI("crush")
 
--- loadAPI()
 
 -- Global configs
 gTorchSpacing = 11
 gTurnRight = false
+gPlaceChests = false
 
 FUEL_SLOT=1
 TORCH_SLOT=2
 CHEST_SLOT=3
 
+--[[
 function checkFuel()
   if turtle.getFuelLevel() < 15 then
     turtle.select(FUEL_SLOT)
     turtle.refuel(1)
   end
 end
+]]
 
 
 function digColumn()
@@ -84,6 +87,10 @@ end
 
 -- Dumps all the contents into a chest
 function emptyContents(chestSlot, torchSlot, startIdx, endIdx)
+  if not gPlaceChests then
+    return
+  end
+
   -- Backup one and put a chest down on the floor
   turtle.back()
   turtle.turnRight()
@@ -136,23 +143,26 @@ end
 
 
 function showHelp()
-  print("Digs a tunnel out, goes spacing to left or right, tunnels back.")
-  print("Usage: ftunnel [-l #] [-w #] [-t #] [-n #] [-r]")
-  print("  -l #  = Length of tunnel, default 60")
-  print("  -w #  = Spacing between tunnels, default 4")
-  print("  -t #  = Spacing between torches, default 11")
-  print("  -n #  = Number of out-back pairs, default 1")
-  print("  -r    = Work to the right, default is to work to the left.")
+  print("Digs a tunnel out, goes spacing to left or right, tunnels back.\n")
+  print("Usage: ftunnel [-l #] [-w #] [-t #] [-n #] [-r] [-h]")
+  print("  -l #  = Length of tunnel.         Default 60")
+  print("  -w #  = Spacing between tunnels.  Default 4")
+  print("  -t #  = Spacing between torches.  Default 11")
+  print("  -n #  = Number of out-back pairs. Default 1")
+  print("  -r    = Work to the right.        Default left.")
+  print("  -c    = Place chests.             Default no chests.")
+  print("  -h    = This help screen.")
+  print("Inventory:")
   print("  slot 1: coal")
   print("  slot 2: torches")
-  print("  slot 3: chests")
-  print("  slot n: might be torches")
+  print("  slot 3: chests (if enabled)")
+  print("  slot n: Can be torches")
 end
 
 
 function mainLoop(length, spacing, iterations)
   print("Starting tunnel: "..length.." x "..spacing)
-  checkFuel()
+  crush.checkFuel()
   turtle.up()
 
   local currIter = 0
@@ -171,7 +181,7 @@ function mainLoop(length, spacing, iterations)
     digRow(length)
 
     currIter = currIter + 1
-    if currIter % 2 == 0 or currIter == iterations then
+    if currIter % 3 == 0 or currIter == iterations then
       emptyContents(CHEST_SLOT, TORCH_SLOT, 4, 16)
     end
 
@@ -188,14 +198,19 @@ end
 
 ---- Main
 
-local argTable = { l=60, w=4, t=11, n=1, r=false }
+local argTable = { l=60, w=4, t=11, n=1, r=false, h=false, c=false }
 -- crush.overlayArgs(":l:w:t:n:r", argTable, ...)
-overlayArgs(":l:w:t:n:r", argTable, ...)
+overlayArgs(":l:w:t:n:rhc", argTable, ...)
 
-gTorchSpacing=argTable.t
-gTurnRight=argTable.r
+if argTable.h then
+  showHelp()
+else
+  gTorchSpacing=argTable.t
+  gTurnRight=argTable.r
+  gPlaceChests=argTable.rc
 
-mainLoop(argTable.l, argTable.w, argTable.n)
+  mainLoop(argTable.l, argTable.w, argTable.n)
+end
 
 print("Done")
 

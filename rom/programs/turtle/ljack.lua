@@ -1,4 +1,6 @@
---local turtle = require "TurtleSim"
+turtle = require "TurtleSim"
+package.path = package.path..";../../apis/turtle/?.lua"
+local crush = require "crush"
 
 function checkFuel()
   if turtle.getFuelLevel() < 10 then
@@ -21,8 +23,8 @@ function chop()
   return foundSomething
 end
 
-function chopTree()
-  print("Chopping tree.")
+
+function chopAllUp()
   height = 0
   checkFuel()
 
@@ -32,52 +34,92 @@ function chopTree()
     turtle.up()
     height = height + 1
   end
-  
-  -- Go back down
+
+  return height
+end
+
+function chopAllDown(height)
   while (height > 0) do
     checkFuel()
+    turtle.dig()
+    turtle.digDown()
     turtle.down()
     height = height - 1
   end
 end
 
+function chopTree(size)
+  print("Chopping tree of size: "..size)
+  if size == 2 then
+    -- Get into first part of trunk
+    ccts("*f")
+  end
+
+  height = chopAllUp()
+  
+  -- On the way down we can do other side of big tree,
+  -- take out leaves
+  if size == 2 then 
+    ccts("*fl*fl")
+    height = height + chopAllUp()
+  else
+    ccts("*f*f")
+  end
+
+  -- Now, take out a bunch of stuff on the way down
+  chopAllDown(height)
+
+  -- Vincini says, back to the beginning!
+  if size == 2 then
+    ccts("*f*fl*fl")
+  else
+    ccts("bb")
+  end
+end
+
 function showHelp()
-  print("Usage: lumberjack <tree_count=1> <space_to_next=0>")
-  print("  Note: spacing does NOT include tree size, just 'open' ground")
+  print("This script has the turtle cut down trees.")
+  print("Place the turtle before the trunk.  For a 2x2 tree")
+  print("place the turtle before and on the right side of")
+  print("the trunk.\n")
+  print("Usage: ljack [-n #] [-w 1|2] [-s #] [-h]")
+  print("  -n #    = Number of trees.      Default = 1")
+  print("  -w 1|2  = Width of tree. 1 or 2 Default = 1")
+  print("  -s #    = SPACE between trees.  Default = 3")
+  print("  -h      = This help screen.")
+  print("Inventory:")
   print("  slot 1: coal")
 end
 
-function mainLoop(count, spacing)
+function mainLoop(count, spacing, size)
   for i = 1,count do
 
     -- Move forward on all but first
     if i > 1 then
-      for n = 1,spacing+1 do
+      for n = 1,spacing do
         turtle.dig()
         turtle.forward()
       end
     end
     
-    chopTree()
+    chopTree(size)
   end
 end
 
 
--- TODO:  Add ability to do 2x2 trees
+-- ========================================
 
 -- Main
-local tArgs = {...}
-if #tArgs == 1 then
+local argTable = { n=1, w=1, s=0, h=false }
+-- crush.overlayArgs(":l:w:t:n:r", argTable, ...)
+overlayArgs(":n:w:s:h", argTable, ...)
+
+if argTable.h then
   showHelp()
 else
-  local count = 1
-  local spacing = 0
-  if #tArgs > 1 then
-    count = tonumber( tArgs[1] )
-    spacing = tonumber( tArgs[2] )
-  end
-  mainLoop(count, spacing, size)
+  mainLoop(argTable.n, argTable.s, argTable.w)
 end
+
 print("Done")
 
 
