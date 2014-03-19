@@ -288,63 +288,114 @@ end
 -- ============================================================================
 -- ============================================================================
 
--- getopt_alt.lua
 
--- getopt, POSIX style command line argument parser
--- param arg contains the command line arguments in a standard table.
--- param options is a string with the letters that expect string values.
--- returns a table where associated keys are true, nil, or a string value.
--- The following example styles are supported
---   -a one  ==> opts["a"]=="one"
---   -bone   ==> opts["b"]=="one"
---   -c      ==> opts["c"]==true
---   --c=one ==> opts["c"]=="one"
---   -cdaone ==> opts["c"]==true opts["d"]==true opts["a"]=="one"
--- note POSIX demands the parser ends at the first non option
---      this behavior isn't implemented.
+--
+-- opt is either the option character, "?", or ":".
+--
+-- If opt is the option character, arg is either a string or false--if optstring
+-- did not specify a required argument.
+--
+-- If opt is either "?" or ":", then arg is the unknown option or the option
+-- lacking the required argument. Like the standard says, there's really only
+-- one scenario for ":" to ever be returned. And per the standard, unless
+-- optstring begins with a colon, "?" is returned instead.
+--
+-- ":" is returned when an opt that has a missing required arg AND optstring starts with ":"
+--
+--[[
+  for opt, arg in getopt(":a:b", ...) do
+    print("opt:", opt, "arg:", arg)
+  end
+]]
+function getopt(optstring, ...)
+	local opts = { }
+	local args = { ... }
 
-function getopt( arg, options )
-  local tab = {}
-  for k, v in ipairs(arg) do
-    if string.sub( v, 1, 2) == "--" then
-      local x = string.find( v, "=", 1, true )
-      if x then tab[ string.sub( v, 3, x-1 ) ] = string.sub( v, x+1 )
-      else      tab[ string.sub( v, 3 ) ] = true
-      end
-    elseif string.sub( v, 1, 1 ) == "-" then
-      local y = 2
-      local l = string.len(v)
-      local jopt
-      while ( y <= l ) do
-        jopt = string.sub( v, y, y )
-        if string.find( options, jopt, 1, true ) then
-          if y < l then
-            tab[ jopt ] = string.sub( v, y+1 )
-            y = l
-          else
-            tab[ jopt ] = arg[ k + 1 ]
-          end
-        else
-          tab[ jopt ] = true
-        end
-        y = y + 1
+	for optc, optv in optstring:gmatch"(%a)(:?)" do
+		opts[optc] = { hasarg = optv == ":" }
+	end
+
+	return coroutine.wrap(function()
+		local yield = coroutine.yield
+		local i = 1
+
+		while i <= #args do
+			local arg = args[i]
+
+			i = i + 1
+
+			if arg == "--" then
+				break
+			elseif arg:sub(1, 1) == "-" then
+				for j = 2, #arg do
+					local opt = arg:sub(j, j)
+
+					if opts[opt] then
+						if opts[opt].hasarg then
+							if j == #arg then
+								if args[i] then
+									yield(opt, args[i])
+									i = i + 1
+								elseif optstring:sub(1, 1) == ":" then
+                  print("egads")
+									yield(':', opt)
+								else
+                  print("woe!")
+									yield('?', opt)
+								end
+							else
+								yield(opt, arg:sub(j + 1))
+							end
+
+							break
+						else
+							yield(opt, false)
+						end
+					else
+						yield('?', opt)
+					end
+				end
+			else
+				yield(false, arg)
+			end
+		end
+
+		for i = i, #args do
+			yield(false, args[i])
+		end
+	end)
+end
+
+--[[
+-- Extracts any args on the command line and places them in the array
+-- IF they exist in the array
+
+  Sample Usage:
+
+  local argTable = { l=60, w=4, t=10, n=1, r=false }
+  overlayArgs(":l:w:t:n:r", argTable, ...)
+]]
+
+function overlayArgs(optstring, argTable, ...)
+  -- TODO:  Stash leftovers...
+
+  for opt, arg in getopt(":l:w:t:n:r", ...) do
+    if argTable[opt] ~= nil then
+      if type(argTable[opt]) == "number" then
+        -- If they had a number before, then do that
+        argTable[opt] = tonumber(arg)
+      elseif type(argTable[opt]) == "boolean" then
+        -- If it was a boolean, then existence is true
+        argTable[opt] = true
+      else
+        -- Stash off what they have
+        argTable[opt] = arg
       end
     end
   end
-  return tab
 end
 
 
--- getopt does NOT strip switches.  This function does that, sort of...
-function stripSwitches(arg)
-  local tab = {}
-  for k,v in ipairs(arg) do
-    if string.sub(v, 1,1) ~= "-" then
-      table.insert(tab, v)
-    end
-  end
-  return tab
-end
 
 
 
