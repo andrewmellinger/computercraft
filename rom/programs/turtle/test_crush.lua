@@ -41,4 +41,21 @@ print("")
 outAndBack(7,-1,false, function(x) print("X"..x) end)
 clearOutAndBack(9,2)
 
+function printTable(table)
+  for k, v in pairs(table) do
+    print("k:", k, "v:", v)
+  end
+end
+
+function testArgs(...)
+  local argTable = { l=60, w=4, t=10, n=1, r=false }
+  printTable(argTable)
+
+  print("---")
+  --overlayArgs(":l:w:t:n:r", argTable, ...)
+  overlayArgs(":l:w:t:n:r", argTable, "-l", "40")
+  printTable(argTable)
+end
+testArgs(...)
+
 print()

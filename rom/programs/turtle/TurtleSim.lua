@@ -182,6 +182,16 @@ function turtleSim.compareUp()
   return false
 end
 
+
+-- Utilities
+
+function turtleSim.getItemCount(slot)
+  return 2
+end
+
+
+
+
 -- Utilities
 
 function inRange(val, min, max)
