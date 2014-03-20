@@ -1,4 +1,4 @@
-inventoryNum = 2
+gInventoryNum = 2
 
 function checkFuel()
   if turtle.getFuelLevel() < 5 then
@@ -11,15 +11,15 @@ end
 function showHelp()
   print("Usage: wall <length> <height>")
   print("  slot 1: coal")
-  print("  slot 2: blocks for wall")
+  print("  slot X: blocks for wall")
 end
 
 
 function findMaterials()
-  for i = inventoryNum, 16 do
+  for i = gInventoryNum, 16 do
     if turtle.getItemCount(i) > 0 then
       turtle.select(i)
-      inventoryNum = i
+      gInventoryNum = i
       return
     end
   end
@@ -49,7 +49,6 @@ end
 
 function mainLoop(length, height)
   print("Starting wall length: "..length.." height: "..height)
-  torchit = 6
   
   out = true
   local remain = 0
@@ -57,7 +56,7 @@ function mainLoop(length, height)
     -- Go out
     tmpLength = length
     if not out then
-      tmpLength = tempLength - remain
+      tmpLength = tmpLength - remain
     end
 
     -- For coming back, we just come back to where we were    
@@ -73,7 +72,7 @@ end
 -- Main
 
 local tArgs = {...}
-if #tArgs < 2
+if #tArgs < 2 then
   showHelp()
 else
   local length = tonumber( tArgs[1] )
