@@ -3,6 +3,33 @@
 -- crush.checkFuel()
 -- In loadAPI it seems to come in as an object automatically.
 
+--[[
+
+Design Notes:
+What if this was build like a normal module, but the internal
+name was different than the the file name?  When we loadAPI
+in turtle script, we can get the variable out.  So maybe
+
+local crush = {}
+function crush.foo()
+end
+
+-- Yes, this is pointing to itself.
+crush.crushLib = crush
+
+return crush
+
+Then the file is crushLib.
+
+On PC 
+local crush = require "crushLib"
+
+On MC, exported as crushLib
+os.loadAPI("crushLib")
+crush = crushLib.crush
+
+]]
+
 REFUEL_LEVEL = 15
 REFUEL_SLOT = 1
 
@@ -46,6 +73,18 @@ function digColumn(up, down)
   end
 end
 
+
+
+-- Digs a column below and in front all the way down.
+function tunnelDown(height)
+  while (height > 0) do
+    checkFuel()
+    turtle.dig()
+    turtle.digDown()
+    turtle.down()
+    height = height - 1
+  end
+end
 
 -- Digs a full row (potentially up and down) executing fn
 -- in each block if not nil.  The fn is good for placing torches.

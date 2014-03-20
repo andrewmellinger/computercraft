@@ -1,13 +1,9 @@
 turtle = require "TurtleSim"
-package.path = package.path..";../../apis/turtle/?.lua"
-local crush = require "crush"
+local crush = turtle.loadCrush()
+--os.loadAPI("crush")
 
-function checkFuel()
-  if turtle.getFuelLevel() < 10 then
-    turtle.select(1)
-    turtle.refuel(1)
-  end
-end
+--package.path = package.path..";../../apis/turtle/?.lua"
+--local crush = require "crush"
 
 function chop()
   foundSomething = false
@@ -23,14 +19,14 @@ function chop()
   return foundSomething
 end
 
-
+-- TODO:  Move to crush
 function chopAllUp()
   height = 0
-  checkFuel()
+  crush.checkFuel()
 
   -- Chop up
   while (chop()) do
-    checkFuel()
+    crush.checkFuel()
     turtle.up()
     height = height + 1
   end
@@ -38,15 +34,6 @@ function chopAllUp()
   return height
 end
 
-function chopAllDown(height)
-  while (height > 0) do
-    checkFuel()
-    turtle.dig()
-    turtle.digDown()
-    turtle.down()
-    height = height - 1
-  end
-end
 
 function chopTree(size)
   print("Chopping tree of size: "..size)
@@ -67,7 +54,7 @@ function chopTree(size)
   end
 
   -- Now, take out a bunch of stuff on the way down
-  chopAllDown(height)
+  crush.tunnelDown(height)
 
   -- Vincini says, back to the beginning!
   if size == 2 then

@@ -13,32 +13,17 @@ local turtleSim = {
   z = 0;
 }
 
--- TODO:  Look at setfenv
---[[
-
-http://www.lua.org/pil/15.4.html
-
-local P = {}
-complex = P
-setfenv(1, P)
-
-function add(c1, c2)
-  -- foo.
-end
-
-This supposedly creates it in complex
-
-
-
-]]
 
 -- Crush Loader
 -- Simply puts all the functions INTO a thing that looks like what
 -- it would look like in CC.
+-- Totally a hack.
 function turtleSim.loadCrush()
   package.path = package.path..";../../apis/turtle/?.lua"
   require "crush"
 
+  -- This doesn't obfuscate/remove any
+  -- Need to see if there is a better way to do this on the other side.
   crush = {}
   crush.checkFuel = checkFuel
   crush.digAll = digAll
@@ -48,6 +33,7 @@ function turtleSim.loadCrush()
   crush.ccts = ccts
   crush.fnOverRow = fnOverRow
   crush.turn = turn
+  crush.tunnelDown = tunnelDown
 
   return crush
 end
