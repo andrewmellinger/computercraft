@@ -25,6 +25,8 @@ function turtleSim.loadCrush()
   -- This doesn't obfuscate/remove any
   -- Need to see if there is a better way to do this on the other side.
   crush = {}
+  crush.overlayArgs = overlayArgs
+
   crush.checkFuel = checkFuel
   crush.digAll = digAll
   crush.digAllUp = digAllUp
