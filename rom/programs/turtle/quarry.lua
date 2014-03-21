@@ -26,6 +26,7 @@ end
 -- Digs the block ahead an maybe one above and one below
 function digIt(height)
   digAll()
+  turtle.forward()
   if height > 1 then
     turtle.digDown()
   end
@@ -41,9 +42,6 @@ function digRow(length, height)
     digIt(height)
     length = length - 1
     
-    if length > 0 then
-      turtle.forward()
-    end
   end
 end
 
@@ -75,7 +73,7 @@ function digSlab(length, width, height, right)
       right = nextRow(height, right)
     end
   end
-  
+ 
   return right
 end
 
@@ -85,7 +83,7 @@ function changeHeight(height, right)
   if height > 0 then
     turtle.turnRight()
     turtle.turnRight()
-    right = not right  -- Since we turned around, re-orient
+    --right = not right  -- Since we turned around, re-orient
 
     turtle.digDown()
     turtle.down()
@@ -97,6 +95,9 @@ function changeHeight(height, right)
       turtle.down()
       gDepth = gDepth +1
     end
+    
+    turtle.digDown()
+    
   end
   return height, right
 end
@@ -105,7 +106,7 @@ end
 function unload()
   -- Go up to the top, turn left and unload into that chest
   -- We go up one extra because the chest would have been above.
-  diff = depth + 1
+  local diff = gDepth + 1
 
   checkFuel()
   for i = 1,diff do
@@ -114,7 +115,7 @@ function unload()
   turtle.turnLeft()
 
   for i = 3,16 do
-    turtle.select(i) 
+    turtle.select(i)
     turtle.drop()
   end
 
@@ -155,36 +156,40 @@ end
 
 
 function mainLoop(length, width, height, torches)
-  print("Starting clearing operation: "..length)
-  torchit = 6
+  print("Starting clearing operation. L: "..length.." W: "..width.." H: "..height)
 
   checkFuel()
   local startingHeight = height;
 
   -- Move down to the starting position if larger area
-  if height > 1 then
+  if height > 2 then
     turtle.digDown()
     turtle.down()
     gDepth = gDepth +1
   end
-  
+
+  -- Clear out below
+  if height > 1 then
+    turtle.digDown()
+  end
+ 
   -- Track left vs. right turns
   local turnRight = true
 
-  -- Scrape away three layers at a time
+  -- Scrape away three layers at a time if they want that much
   outAndBack = false
   while (height > 0) do
-    right = digSlab(length, width, height, right)
+    turnRight = digSlab(length, width, height, turnRight)
 
     if height > 1 then
       turtle.down()
-      gDepth = gDepth +1
+      gDepth = gDepth + 1
       -- We should now be right above the next lay,
       -- so changeHeight should work
     end
 
     -- Go down if we need to change layers
-    height, right = changeHeight(height, right)
+    height, turnRight = changeHeight(height, turnRight)
 
     if outAndBack then
       unload()

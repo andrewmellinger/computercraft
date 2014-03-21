@@ -1,9 +1,6 @@
-turtle = require "TurtleSim"
-local crush = turtle.loadCrush()
---os.loadAPI("crush")
-
---package.path = package.path..";../../apis/turtle/?.lua"
---local crush = require "crush"
+--turtle = require "TurtleSim"
+--local crush = turtle.loadCrush()
+os.loadAPI("crush")
 
 function chop()
   foundSomething = false
@@ -50,7 +47,7 @@ function chopTree(size)
     ccts("*fl*fl")
     height = height + chopAllUp()
   else
-    ccts("*f*f")
+    crush.ccts("*f*f")
   end
 
   -- Now, take out a bunch of stuff on the way down
@@ -58,9 +55,9 @@ function chopTree(size)
 
   -- Vincini says, back to the beginning!
   if size == 2 then
-    ccts("*f*fl*fl")
+    crush.ccts("*f*fl*fl")
   else
-    ccts("bb")
+    crush.ccts("bb")
   end
 end
 
@@ -83,7 +80,7 @@ function mainLoop(count, spacing, size)
 
     -- Move forward on all but first
     if i > 1 then
-      for n = 1,spacing do
+      for n = 1,spacing + 1 do
         turtle.dig()
         turtle.forward()
       end
@@ -98,8 +95,7 @@ end
 
 -- Main
 local argTable = { n=1, w=1, s=0, h=false }
--- crush.overlayArgs(":l:w:t:n:r", argTable, ...)
-overlayArgs(":n:w:s:h", argTable, ...)
+crush.overlayArgs(":n:w:s:h", argTable, ...)
 
 if argTable.h then
   showHelp()

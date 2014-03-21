@@ -1,8 +1,7 @@
 -- First two lines are for PC, the last one is for MC.
-turtle = require "TurtleSim"
-local crush = turtle.loadCrush()
--- os.loadAPI("crush")
-
+--turtle = require "TurtleSim"
+--local crush = turtle.loadCrush()
+os.loadAPI("crush")
 
 -- Global configs
 gTorchSpacing = 11
@@ -12,15 +11,6 @@ gPlaceChests = false
 FUEL_SLOT=1
 TORCH_SLOT=2
 CHEST_SLOT=3
-
---[[
-function checkFuel()
-  if turtle.getFuelLevel() < 15 then
-    turtle.select(FUEL_SLOT)
-    turtle.refuel(1)
-  end
-end
-]]
 
 
 function digColumn()
@@ -38,7 +28,7 @@ function digRow(length)
     torchIt = math.floor(length / 2)
   end
   while (length > 0) do
-    checkFuel()
+    crush.checkFuel()
     digColumn()
     torchIt = checkTorch(torchIt)
     length = length - 1
@@ -143,14 +133,15 @@ end
 
 
 function showHelp()
-  print("Digs a tunnel out, goes spacing to left or right, tunnels back.\n")
+  print("Digs a tunnel out, goes spacing to left")
+  print("   or right, tunnels back.\n")
   print("Usage: ftunnel [-l #] [-w #] [-t #] [-n #] [-r] [-h]")
-  print("  -l #  = Length of tunnel.         Default 60")
-  print("  -w #  = Spacing between tunnels.  Default 4")
-  print("  -t #  = Spacing between torches.  Default 11")
-  print("  -n #  = Number of out-back pairs. Default 1")
-  print("  -r    = Work to the right.        Default left.")
-  print("  -c    = Place chests.             Default no chests.")
+  print("  -l #  = Length             Def 60")
+  print("  -w #  = Tunnel spacing.    Def 4")
+  print("  -t #  = Turch spacing.     Def 11")
+  print("  -n #  = Nm out-back pairs. Def 1")
+  print("  -r    = Go right instead of left.")
+  print("  -c    = Place chests.      Default no chests.")
   print("  -h    = This help screen.")
   print("Inventory:")
   print("  slot 1: coal")
@@ -200,7 +191,7 @@ end
 
 local argTable = { l=60, w=4, t=11, n=1, r=false, h=false, c=false }
 -- crush.overlayArgs(":l:w:t:n:r", argTable, ...)
-overlayArgs(":l:w:t:n:rhc", argTable, ...)
+crush.overlayArgs(":l:w:t:n:rhc", argTable, ...)
 
 if argTable.h then
   showHelp()
