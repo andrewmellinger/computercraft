@@ -13,6 +13,13 @@ local turtleSim = {
   z = 0;
 }
 
+-- Loads the file
+function tsLoadFile(path)
+  local fh = io.open(path, "r")
+  local content = fh:read("*all")
+  fh:close()
+  return content
+end
 
 -- Crush Loader
 -- Simply puts all the functions INTO a thing that looks like what
@@ -36,6 +43,9 @@ function turtleSim.loadCrush()
   crush.fnOverRow = fnOverRow
   crush.turn = turn
   crush.tunnelDown = tunnelDown
+
+  -- NOTE:  This is NOT the actual one from crush, but one for the Simulator
+  crush.loadFile = tsLoadFile
 
   return crush
 end

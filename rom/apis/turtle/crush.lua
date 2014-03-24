@@ -30,6 +30,17 @@ crush = crushLib.crush
 
 ]]
 
+
+function loadFile(path)
+  local fh = fs.open(path, 'r')
+  local content = fh.readAll()
+  fh.close()
+  return content
+end
+
+-- ============================================================================
+
+
 REFUEL_LEVEL = 15
 REFUEL_SLOT = 1
 
