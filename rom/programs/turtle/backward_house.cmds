@@ -24,8 +24,8 @@ full      # up to starting position
 ^4rb      # 4,4
 ^4b       # 3,4
 ^4rblf    # 2,4
-^4b       # 3,3      
-^4bb      # 2,3
+^4b       # 3,3  
+^4bbd     # 2,3
 ~5        # Door
 
 

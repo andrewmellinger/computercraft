@@ -174,8 +174,16 @@ end
 -- #     #       #       # 
 --  ####  ####   #   #### 
 
--- TODO: Add entire ccts engine here
 
+-- Used to reload fuel if needed
+function ccts_checkFuel()
+  if turtle.getFuelLevel() < 15 then
+    turtle.select(16)
+    turtle.refuel(1)
+  end
+end
+
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 -- The vocabulary primitives
 function selectAndPlace(invId)
@@ -183,21 +191,31 @@ function selectAndPlace(invId)
   turtle.placeDown()
 end
 
-
 -- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-
 function goForward(idx)
-  --if turtle.detect() then
-  --  turtle.dig()
-  --end
+  turtle.dig()
   turtle.forward()
   return idx
 end
 
-
 -- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+-- Specific to CCTS
+-- TOOD:  Since we have IDX, do we really need sym?
+local function dispatch(idx)
+  ccts_checkFuel()
+  local sym = ccts_context.cmds:sub(idx,idx)
+  func = ccts_context.funcs[sym]
+  if func == nil then
+    print("Failed to find function for: '" ..sym.."'")
+  else
+    idx = func(idx);
+  end
+  return idx
+end
+
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 function repeatIt(idx)
   -- Format:  @[0-9]*\[cmds\]
@@ -215,7 +233,7 @@ function repeatIt(idx)
     newIdx = bracket + 1
     local cmd = ccts_context.cmds:sub(newIdx, newIdx)
     while cmd ~= ']' do
-      newIdx = dispatch(cmd, newIdx)
+      newIdx = dispatch(newIdx)
       newIdx = newIdx + 1
       cmd = ccts_context.cmds:sub(newIdx, newIdx)
     end
@@ -256,23 +274,6 @@ end
 local function ignoreComments(idx)
   while ccts_context.cmds:sub(idx, idx) ~= "\n" do
     idx = idx + 1
-  end
-  return idx
-end
-
-
--- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
--- Specific to CCTS
--- TOOD:  Since we have IDX, do we really need sym?
-local function dispatch(idx)
-  local sym = ccts_context.cmds:sub(idx,idx)
-  func = ccts_context.funcs[sym]
-  if func == nil then
-    print("Failed to find function for: '" ..sym.."'")
-  else
-    idx = func(idx);
   end
   return idx
 end
@@ -327,7 +328,6 @@ function ccts(cmds)
   -- Execute the file one command at a time
   local idx = 0
   while idx <= #cmds do
-    checkFuel()
     idx = dispatch(idx)
     idx = idx + 1;
   end

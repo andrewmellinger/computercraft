@@ -1,0 +1,35 @@
+# Backwards construction of a chickenator
+# 1 = glass
+# 2 = glass
+ull      # up to starting position
+
+# Perimeter
+1^1b         
+@7[1^1~1b]
+
+1^1~1rb
+@7[1^1~1b]
+
+3^3~3rb
+@7[3^3~3b]
+
+3^3~3rb
+@6[3^3~3b]
+3^3~3rb
+~3
+
+# Floor
+@6[2b]2rb
+@5[2b]2rb
+@5[2b]2rb
+@4[2b]2rb
+@4[2b]2rb
+@3[2b]2rb
+@3[2b]2rb
+@2[2b]2rb
+@2[2b]2rb
+2b2rb
+2b2rb
+2b
+
+

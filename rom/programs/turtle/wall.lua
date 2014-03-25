@@ -50,22 +50,26 @@ end
 function mainLoop(length, height)
   print("Starting wall length: "..length.." height: "..height)
   
+  checkFuel()
+
   out = true
   local remain = 0
   while (height > 0) do
+    turtle.up()
+    
     -- Go out
     tmpLength = length
     if not out then
-      tmpLength = tmpLength - remain
+      tmpLength = tmpLength - remain + 1
     end
 
     -- For coming back, we just come back to where we were    
-    local remain = layer(length)
+    remain = layer(tmpLength)
     out = not out
     
     height = height - 1
-    turtle.left()
-    turtle.left()
+    turtle.turnLeft()
+    turtle.turnLeft()
   end      
 end
 

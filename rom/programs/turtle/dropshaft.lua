@@ -56,7 +56,7 @@ end
 
 -- Main
 local tArgs = {...}
-if #tArgs < 1
+if #tArgs < 1 then
   showHelp()
 else
   local length = tonumber( tArgs[1] )
