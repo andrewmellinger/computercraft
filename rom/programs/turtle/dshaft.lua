@@ -1,6 +1,6 @@
-turtle = require "TurtleSim"
-local crush = turtle.loadCrush()
---os.loadAPI("crush")
+--turtle = require "TurtleSim"
+--local crush = turtle.loadCrush()
+os.loadAPI("crush")
 
 -- CONSTANTS
 local TORCH_NUM = 2
