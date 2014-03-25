@@ -49,7 +49,6 @@ function walkPlan(plan)
     elseif inComment then
       -- Nothing to do 
     elseif c == "#" then
-      print "Found comment sign."
       inComment = true
     elseif c == "-" then
       newFloor, clockwise = doNewRow(newFloor, clockwise)
@@ -67,7 +66,7 @@ function walkPlan(plan)
     elseif c == "\n" then
       -- No-op
     else
-      print("Couldn't parse '"..c.."' "..idx.."/"..#plan)
+      print("# Couldn't parse '"..c.."' "..idx.."/"..#plan)
     end
     idx = idx + 1
   end
@@ -89,7 +88,6 @@ end
 
 function seekToFirstRow(plan) 
   idx = 1
-  print("Finding first row")
   while idx <= #plan do
     local c = plan:sub(idx,idx)
     if c == "+" then
@@ -97,7 +95,7 @@ function seekToFirstRow(plan)
     end
     idx = idx + 1
   end
-  print("Couldn't find floor marker!!!")
+  print("# Couldn't find floor marker!!!")
   return #plan
 end
 
