@@ -3,7 +3,6 @@
 -- to add custom bits like torches, etc.  The command
 -- file is then executed by puppet.
 
-
 function ccLoadFile(path)
   local fh = fs.open(path, 'r')
   local content = fh.readAll()
@@ -41,10 +40,17 @@ function walkPlan(plan)
   clockwise = true    -- Should we rotate CW, or CCW?  We alternate every row except when floor changes
   newFloor = true     -- Did the floor change?
 
+  local inComment = false
   while idx <= #plan do
     local c=plan:sub(idx, idx)
     -- Print row based on which way we are going
-    if c == "-" then
+    if inComment and c == "\n" then
+      inComment = false
+    elseif inComment then
+      -- Nothing to do 
+    elseif c == "#" then
+      inComment = true
+    elseif c == "-" then
       newFloor, clockwise = doNewRow(newFloor, clockwise)
       endIdx = getRowEnd(plan, idx + 1)
       if (l2r) then
@@ -60,7 +66,7 @@ function walkPlan(plan)
     elseif c == "\n" then
       -- No-op
     else
-      print("Couldn't parse '"..c.."' "..idx.."/"..#plan)
+      print("# Couldn't parse '"..c.."' "..idx.."/"..#plan)
     end
     idx = idx + 1
   end
@@ -87,8 +93,9 @@ function seekToFirstRow(plan)
     if c == "+" then
       return idx+1 
     end
+    idx = idx + 1
   end
-  print("Couldn't find floor marker!!!")
+  print("# Couldn't find floor marker!!!")
   return #plan
 end
 
