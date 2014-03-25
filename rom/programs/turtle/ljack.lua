@@ -2,6 +2,8 @@
 --local crush = turtle.loadCrush()
 os.loadAPI("crush")
 
+-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 function chop()
   foundSomething = false
   if turtle.detect() then
@@ -15,6 +17,8 @@ function chop()
   end
   return foundSomething
 end
+
+-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 -- TODO:  Move to crush
 function chopAllUp()
@@ -31,6 +35,7 @@ function chopAllUp()
   return height
 end
 
+-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 function chopTree(size, count, spacing)
   print("Chopping tree of size: "..size)
@@ -89,6 +94,8 @@ function showHelp()
   print("  slot 1: coal")
 end
 
+-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 function mainLoop(count, spacing, size)
   while count > 0 do
 
@@ -104,8 +111,7 @@ function mainLoop(count, spacing, size)
   end
 end
 
-
--- ========================================
+-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 -- Main
 local argTable = { n=1, w=1, s=0, h=false }
