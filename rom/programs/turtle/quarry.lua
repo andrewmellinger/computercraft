@@ -152,6 +152,7 @@ function returnHome(length, width, atStartCorner)
 
   -- Up
   for i = 1,gDepth do 
+    crush.checkFuel()
     turtle.up()
   end
 
@@ -162,6 +163,7 @@ function returnHome(length, width, atStartCorner)
     turtle.up()
   end
   if not turtle.detect() then
+    crush.checkFuel()
     turtle.forward()
   end
 

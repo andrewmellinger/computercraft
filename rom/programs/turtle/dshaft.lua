@@ -21,7 +21,6 @@ function checkTorch(counter)
   counter = counter - 1
   if counter == 0 then
     turtle.turnRight()
-    crush.digAll()
     turtle.select(TORCH_NUM)
     turtle.placeDown()
     turtle.turnLeft()
@@ -38,9 +37,9 @@ function findBottom()
   local depth = 0;
   while not turtle.detectDown() do
     crush.checkFuel()
+    turtle.down()
     turtle.select(BACKING_BLOCK_NUM)
     turtle.place()
-    turtle.down()
     depth = depth + 1
   end
 
@@ -54,10 +53,10 @@ end
 function goDown(depth)
   while depth > 0 do
     crush.checkFuel()
-    turtle.select(BACKING_BLOCK_NUM)
-    turtle.place()
     turtle.digDown()
     turtle.down()
+    turtle.select(BACKING_BLOCK_NUM)
+    turtle.place()
     depth = depth - 1
   end
 end
@@ -71,7 +70,7 @@ function ladderUp(depth)
   
   -- Go up the whole way
   while (depth > 0) do
-    checkFuel()
+    crush.checkFuel()
 
     -- Place the ladder in front
     turtle.select(LADDER_NUM)

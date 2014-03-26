@@ -41,7 +41,7 @@ function chopTree(size, count, spacing)
   print("Chopping tree of size: "..size)
   if size == 2 then
     -- Get into first part of trunk
-    ccts("*f")
+    crush.ccts("*f")
   end
 
   height = chopAllUp()
@@ -49,7 +49,7 @@ function chopTree(size, count, spacing)
   -- On the way down we can chop wood or leaves
   if size == 2 then 
     -- Size two tree, do the other side..
-    ccts("*fr*fr")
+    crush.ccts("*fr*fr")
   elseif count > 1 then
     -- For size one trees with > 1, do another tree
     for i = 1,spacing+1 do
