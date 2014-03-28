@@ -17,38 +17,54 @@ function digColumn()
 end
 
 
--- TODO:  Move to crush
-function checkTorch(counter, torchInterval)
+-- TODO:  Move to crush once tested
+function checkTorch(counter, torchInterval, torchSlot, blockSlot, doBehind)
   if torchInterval <= 0 then
     return 0
   end
 
-  counter = counter - 1
-  if counter == 0 then
-    turtle.select(2)
+  if counter > 0 then
+    return counter - 1
+  end
 
-    -- First, try right side
-    turtle.turnRight()
+  -- Torch is slot 2
+  turtle.select(torchSlot)
+
+  -- First, try right side
+  turtle.turnRight()
+  if turtle.placeUp() then
+    turtle.turnLeft()
+    return torchInterval
+  end
+  
+  -- If they gave us a block to place, try it
+  if blockSlot > 0 then
+    turtle.up()
+    turtle.select(blockSlot)
+    turtle.place()
+    turtle.down()
+    turtle.select(torchSlot)
     local placedIt = turtle.placeUp()
     turtle.turnLeft()
 
-    -- Try left side
-    if not placedIt then
-      turtle.turnLeft()
-      if turtle.placeUp() then
-        turtle.turnRight()
-      else
-        -- Fallback to behind
-        turtle.turnLeft()
-        turtle.place()
-        turtle.turnRight()
-        turtle.turnRight()
-      end      
+    if placedIt then
+      return torchInterval
     end
-
-    counter = torchInterval
   end
-  return counter
+
+  -- Try left side
+  turtle.turnLeft()
+  if not turtle.placeUp() then
+    if doBehind then
+      -- Fallback to behind
+      turtle.turnLeft()
+      turtle.place()
+      turtle.turnRight()
+    end
+  end      
+  turtle.turnRight()
+
+  return torchInterval
 end
 
 
@@ -73,7 +89,7 @@ function mainLoop(length, torchSpacing)
   while (length > 0) do
     crush.checkFuel()
     digColumn()
-    torchCounter = checkTorch(torchCounter, torchSpacing)
+    torchCounter = checkTorch(torchCounter, torchSpacing, 2, 3, false)
     length = length - 1
   end
 
