@@ -1,7 +1,7 @@
 -- First two lines are for PC, the last one is for MC.
---turtle = require "TurtleSim"
---local crush = turtle.loadCrush()
-os.loadAPI("crush")
+turtle = require "TurtleSim"
+local crush = turtle.loadCrush()
+--os.loadAPI("crush")
 
 -- Global configs
 gTorchSpacing = 11
@@ -11,14 +11,23 @@ gPlaceChests = false
 FUEL_SLOT=1
 TORCH_SLOT=2
 CHEST_SLOT=3
+BRIDGE_SLOT=4
 
 
 function digColumn()
-  while turtle.detect() do
-    turtle.dig()
-  end
+  crush.digAll()
   turtle.forward()
-  turtle.digDown()
+  crush.digAllUp()
+  
+  -- Bridge if we can
+  if turtle.getItemCount(BRIDGE_SLOT) == 1 then
+    crush.gatherItems(BRIDGE_SLOT, 5, 16)
+  end
+
+  if turtle.getItemCount(BRIDGE_SLOT) >= 1 then
+    turtle.select(BRIDGE_SLOT)
+    turtle.placeDown()
+  end
 end
 
 
@@ -36,40 +45,31 @@ function digRow(length)
 end
 
 
--- Moves torches to slot 2 until we get 64
-function gatherTorches()
-  for i = 4,16 do
-    turtle.select(i)
-    if turtle.compareTo(TORCH_SLOT) then
-      turtle.transferTo(TORCH_SLOT)
-      if turtle.getItemCount(TORCH_SLOT) == 64 then
-        break
-      end
-    end
-  end
-end
-
 -- Place a torch down if we have them.
-function placeTorchDown()
+function placeTorch()
   if turtle.getItemCount(TORCH_SLOT) == 1 then
-    gatherTorches()
+    crush.gatherItems(TORCH_SLOT, 5, 16)
   end
   if turtle.getItemCount(TORCH_SLOT) > 1 then
     turtle.select(TORCH_SLOT)
-    turtle.placeDown()
-    --print("Torching!")
+
+    turtle.turnRight()
+    turtle.turnRight()
+    turtle.place()
+    turtle.turnRight()
+    turtle.turnRight()
   end
 end
 
 -- Checks to see if we need to place a torch down
 function checkTorch(counter)
-  if gTorchSpacing == 0 then
+  if gTorchSpacing <= 0 then
     return 0
   end
 
   counter = counter - 1
   if counter == 0 then
-    placeTorchDown()
+    placeTorch()
     counter = gTorchSpacing
   end
   return counter
@@ -80,6 +80,10 @@ function emptyContents(chestSlot, torchSlot, startIdx, endIdx)
   if not gPlaceChests then
     return
   end
+
+  -- Gather up torches and blocks before we do this
+  crush.gatherItems(TORCH_SLOT, 5, 16)
+  crush.gatherItems(BRIDGE_SLOT, 5, 16)
 
   -- Backup one and put a chest down on the floor
   turtle.back()
@@ -109,7 +113,7 @@ function emptyContents(chestSlot, torchSlot, startIdx, endIdx)
   turtle.forward()
 end
 
--- This doens't dig down
+-- This doesn't dig down
 function moveOver(spacing)
 
   -- Move over so we can do it again.
@@ -133,57 +137,47 @@ end
 
 
 function showHelp()
-  print("Digs a tunnel out, goes spacing to left")
-  print("   or right, tunnels back.\n")
-  print("Usage: ftunnel [-l #] [-w #] [-t #] [-n #] [-r] [-h]")
+  print("feather [-l #] [-w #] [-t #] [-n #] [-r] [-c] [-h]")
   print("  -l #  = Length             Def 60")
   print("  -w #  = Tunnel spacing.    Def 4")
-  print("  -t #  = Turch spacing.     Def 11")
+  print("  -t #  = Torch spacing.     Def 11")
   print("  -n #  = Nm out-back pairs. Def 1")
-  print("  -r    = Go right instead of left.")
-  print("  -c    = Place chests.      Default no chests.")
+  print("  -r    = Right instead of left.")
+  print("  -c    = Place chests.      Def no chests.")
   print("  -h    = This help screen.")
-  print("Inventory:")
-  print("  slot 1: coal")
-  print("  slot 2: torches")
-  print("  slot 3: chests (if enabled)")
-  print("  slot n: Can be torches")
+  print("  s1 coal, s2 torches, s3 chests, s4 filler")
 end
 
 
 function mainLoop(length, spacing, iterations)
   print("Starting tunnel: "..length.." x "..spacing)
   crush.checkFuel()
-  turtle.up()
 
   local currIter = 0
   while (currIter < iterations) do
-    print ("Starting iteration: "..currIter.." of "..iterations)
-
-    print("\nDigging out")
+    -- Out
     digRow(length)
 
-    print("\nDigging over")
+    -- Across
     turn(gTurnRight)
     digRow(spacing + 1)
     turn(gTurnRight)
 
-    print("\nDigging back")
+    -- Back
     digRow(length)
 
+    -- Dump stuff
     currIter = currIter + 1
     if currIter % 3 == 0 or currIter == iterations then
-      emptyContents(CHEST_SLOT, TORCH_SLOT, 4, 16)
+      emptyContents(CHEST_SLOT, TORCH_SLOT, 5, 16)
     end
 
+    -- Next out-back
     if currIter < iterations then
-      print("Moving over")
       moveOver(spacing)
     end
   end 
 
-  turtle.digDown()
-  turtle.down()
 end
 
 
