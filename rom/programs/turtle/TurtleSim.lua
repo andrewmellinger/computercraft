@@ -43,6 +43,7 @@ function turtleSim.loadCrush()
   crush.fnOverRow = fnOverRow
   crush.turn = turn
   crush.tunnelDown = tunnelDown
+  crush.gatherItems = gatherItems
 
   -- NOTE:  This is NOT the actual one from crush, but one for the Simulator
   crush.loadFile = tsLoadFile

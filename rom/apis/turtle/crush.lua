@@ -52,6 +52,25 @@ function checkFuel()
   end
 end
 
+
+-- Move items from other slots that match the item in the specified slot
+-- until empty.
+function gatherItems(targt, min, max)
+  for i = min,max do
+    if i ~= target then
+      turtle.select(i)
+      if turtle.compareTo(target) then
+        turtle.transferTo(target)
+        if turtle.getItemCount(target) == 64 then
+          break
+        end
+      end
+    end
+  end
+end
+
+
+-- ============================================================================
 -- Digs forward until we don't detect anything.
 -- Good for getting through sand/gravel.
 function digAll()
