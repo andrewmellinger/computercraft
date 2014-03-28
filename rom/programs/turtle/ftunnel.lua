@@ -1,41 +1,35 @@
--- os.loadAPI("crush")
--- os.loadAPI("/rom/programs/turtle/crush")
-local turtle = require "TurtleSim"
---[[
-
-TODO: Add switches:  Exclusive modes
--torch - go high and place torches - torches in 2
--bridge - go low and place bridge - blocks in 2
-
-]]
-
-
-function checkFuel()
-  if turtle.getFuelLevel() < 15 then
-    turtle.select(1)
-    turtle.refuel(1)
-  end
-end
-
+-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- ComputerCraft script for digging "fast tunnels" (ftunnel.)
+-- This is faster than the built in tunnel because it only does one wide
+-- and two high. Will place torches if it has some and is configured with a
+-- spacing > 0, and will place blocks for bridging.
+-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+--turtle = require "TurtleSim"
+--local crush = turtle.loadCrush()
+os.loadAPI("crush")
 
 function digColumn()
-  while turtle.detect() do
-    turtle.dig()
-  end
+  crush.digAll()
   turtle.forward()
-  turtle.digDown()
+  crush.digAllUp()
+  turtle.select(3)
+  turtle.placeDown()
 end
 
 
 function checkTorch(counter, torchInterval)
-  if torchInterval == 0 then
+  if torchInterval <= 0 then
     return 0
   end
 
   counter = counter - 1
   if counter == 0 then
+    turtle.turnRight()
+    turtle.turnRight()
     turtle.select(2)
-    turtle.placeDown()
+    turtle.place()
+    turtle.turnRight()
+    turtle.turnRight()
     counter = torchInterval
   end
   return counter
@@ -43,46 +37,45 @@ end
 
 
 function showHelp()
-  print("Usage: ftunnel <length> <torch_interval=8>")
-  print("Goes up, digs ahead and down, places torches on interval.")
-  print("If torchInterval == 0, then no torches are placed")
-  print("  slot 1: coal")
-  print("  slot 2: torches")
+  print("ftunnel [-l #] [-t #]")
+  print("Digs two high tunnel with torches and bridging")
+  print("  -l #: length, def 16")
+  print("  -t #: torch spacing, 0 skip, def 11")
+  print("  s1: coal")
+  print("  s2: torches")
+  print("  s3: blocks for bridging")
 end
 
 
-function mainLoop(length, torchInterval)
-  print("Starting tunnel length: "..length)
-  local torchCounter = torchInterval
-
-  -- Go high so we can make torch placement easy
-  turtle.up()
+function mainLoop(length, torchSpacing)
+  print("Length: "..length.." spacing: "..torchSpacing)
+  if torchSpacing == 0 then
+    print ("  Skipping torch placement.")
+  end
+  local torchCounter = torchSpacing
 
   while (length > 0) do
-    checkFuel()
+    crush.checkFuel()
     digColumn()
-    torchCounter = checkTorch(torchCounter, torchInterval)
+    torchCounter = checkTorch(torchCounter, torchSpacing)
     length = length - 1
   end
 
-  -- Clear in case we placed a torch
-  turtle.digDown()
-  turtle.down()
 end
+
+-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 -- Main
 
-local tArgs = {...}
-if #tArgs < 1 then
+local argTable = { l=16, t=11, h=false }
+crush.overlayArgs(":l:t:h", argTable, ...)
+
+if argTable.h then
   showHelp()
 else
-  local length = tonumber( tArgs[1] )
-  local torchInterval = 8
-  if #tArgs > 1
-    torchInterval = tonumber( tArgs[2] )
-  end
-  mainLoop(length, torchInterval)
+  mainLoop(argTable.l, argTable.t)
 end
+
 print("Done")
 
 
