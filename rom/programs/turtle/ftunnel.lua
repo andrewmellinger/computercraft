@@ -17,6 +17,7 @@ function digColumn()
 end
 
 
+-- TODO:  Move to crush
 function checkTorch(counter, torchInterval)
   if torchInterval <= 0 then
     return 0
@@ -24,12 +25,27 @@ function checkTorch(counter, torchInterval)
 
   counter = counter - 1
   if counter == 0 then
-    turtle.turnRight()
-    turtle.turnRight()
     turtle.select(2)
-    turtle.place()
+
+    -- First, try right side
     turtle.turnRight()
-    turtle.turnRight()
+    local placedIt = turtle.placeUp()
+    turtle.turnLeft()
+
+    -- Try left side
+    if not placedIt then
+      turtle.turnLeft()
+      if turtle.placeUp() then
+        turtle.turnRight()
+      else
+        -- Fallback to behind
+        turtle.turnLeft()
+        turtle.place()
+        turtle.turnRight()
+        turtle.turnRight()
+      end      
+    end
+
     counter = torchInterval
   end
   return counter
