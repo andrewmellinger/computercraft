@@ -23,23 +23,30 @@ function checkTorch(counter, torchInterval, torchSlot, blockSlot, doBehind)
     return 0
   end
 
+  -- If the counter hasn't reach zero, just count down
   if counter > 0 then
     return counter - 1
   end
 
+  -- Go back because it might one put on the wall we are about to dig
+  -- and so will get destroyed
+  -- TODO:  Move into digColumn before forward to optimize movement
+  turtle.back()
+
   -- Torch is slot 2
   turtle.select(torchSlot)
 
-  -- First, try right side
-  turtle.turnRight()
+  -- First, try placing "up" 
+  -- The way CC works, it will choose a side.
   if turtle.placeUp() then
-    turtle.turnLeft()
+    turtle.forward()
     return torchInterval
   end
   
   -- If they gave us a block to place, try it
   if blockSlot > 0 then
     turtle.up()
+    turtle.turnRight()
     turtle.select(blockSlot)
     turtle.place()
     turtle.down()
@@ -48,21 +55,21 @@ function checkTorch(counter, torchInterval, torchSlot, blockSlot, doBehind)
     turtle.turnLeft()
 
     if placedIt then
+      turtle.forward()
       return torchInterval
     end
   end
 
-  -- Try left side
-  turtle.turnLeft()
-  if not turtle.placeUp() then
-    if doBehind then
-      -- Fallback to behind
-      turtle.turnLeft()
-      turtle.place()
-      turtle.turnRight()
-    end
-  end      
-  turtle.turnRight()
+  turtle.forward()
+
+  -- At this point try behind
+  if doBehind then
+    turtle.turnLeft()
+    turtle.turnLeft()
+    turtle.place()
+    turtle.turnRight()
+    turtle.turnRight()
+  end
 
   return torchInterval
 end

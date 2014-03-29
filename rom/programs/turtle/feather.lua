@@ -1,7 +1,7 @@
 -- First two lines are for PC, the last one is for MC.
-turtle = require "TurtleSim"
-local crush = turtle.loadCrush()
---os.loadAPI("crush")
+--turtle = require "TurtleSim"
+--local crush = turtle.loadCrush()
+os.loadAPI("crush")
 
 -- Global configs
 gTorchSpacing = 11
@@ -87,11 +87,9 @@ function emptyContents(chestSlot, torchSlot, startIdx, endIdx)
 
   -- Backup one and put a chest down on the floor
   turtle.back()
+  turtle.up()
   turtle.turnRight()
-  while turtle.detect() do
-    turtle.dig()
-  end
-  turtle.digDown()
+  crush.digAll()
   turtle.down()
   turtle.dig()
 
@@ -108,7 +106,6 @@ function emptyContents(chestSlot, torchSlot, startIdx, endIdx)
   end
 
   -- Put us back where we were
-  turtle.up()
   turtle.turnLeft()
   turtle.forward()
 end
@@ -168,13 +165,13 @@ function mainLoop(length, spacing, iterations)
 
     -- Dump stuff
     currIter = currIter + 1
-    if currIter % 3 == 0 or currIter == iterations then
+    if currIter % 2 == 0 or currIter == iterations then
       emptyContents(CHEST_SLOT, TORCH_SLOT, 5, 16)
     end
 
     -- Next out-back
     if currIter < iterations then
-      moveOver(spacing)
+      moveOver(spacing + 1)
     end
   end 
 
@@ -184,7 +181,6 @@ end
 ---- Main
 
 local argTable = { l=60, w=4, t=11, n=1, r=false, h=false, c=false }
--- crush.overlayArgs(":l:w:t:n:r", argTable, ...)
 crush.overlayArgs(":l:w:t:n:rhc", argTable, ...)
 
 if argTable.h then
@@ -192,7 +188,7 @@ if argTable.h then
 else
   gTorchSpacing=argTable.t
   gTurnRight=argTable.r
-  gPlaceChests=argTable.rc
+  gPlaceChests=argTable.c
 
   mainLoop(argTable.l, argTable.w, argTable.n)
 end
