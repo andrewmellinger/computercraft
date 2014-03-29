@@ -55,7 +55,7 @@ end
 
 -- Move items from other slots that match the item in the specified slot
 -- until empty.
-function gatherItems(targt, min, max)
+function gatherItems(target, min, max)
   for i = min,max do
     if i ~= target then
       turtle.select(i)
