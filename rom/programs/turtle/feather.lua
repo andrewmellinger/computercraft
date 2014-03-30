@@ -10,8 +10,8 @@ gPlaceChests = false
 
 FUEL_SLOT=1
 TORCH_SLOT=2
-CHEST_SLOT=3
-BRIDGE_SLOT=4
+BRIDGE_SLOT=3
+CHEST_SLOT=4
 
 
 function digColumn()
@@ -142,7 +142,7 @@ function showHelp()
   print("  -r    = Right instead of left.")
   print("  -c    = Place chests.      Def no chests.")
   print("  -h    = This help screen.")
-  print("  s1 coal, s2 torches, s3 chests, s4 filler")
+  print("  s1 coal, s2 torches, s3 filler, s4 chests")
 end
 
 
