@@ -2,16 +2,181 @@
 -- turtle programs on a linux ssystem
 --  No blocks above below min/max.
 
+-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+-- #   #  ###  ####  #     ####  
+-- #   # #   # #   # #     #   # 
+-- #   # #   # ####  #     #   # 
+-- # # # #   # #   # #     #   # 
+--  # #   ###  #   # ##### ####  
+
+
+MAX_X =  100;
+MIN_X = -100;
+MAX_Y =  100;
+MIN_Y = -100;
+MAX_Z =  100;
+MIN_Z = -100;
+
+
+-- Basic block ID's to use for inventory code...
+
+NO_BLOCK          = 0;
+STONE_BLOCK       = 1;
+DIRT_BLOCK        = 3;
+COBBLESTONE_BLOCK = 4
+GRAVEL_BLOCK      = 13
+LOG_BLOCK         = 17
+LEAVES_BLOCK      = 18
+TORCH             = 50
+
+-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+local function makeWorldKey(x, y, z)
+  return string.format("%d,%d,%d", x, y, z)
+end
+
+local function setVoxel(volume, x, y, z, id)
+  key = makeWorldKey(x, y, z)
+  volume[key] = id
+end
+
+local function getVoxel(volume, x, y, z, default)
+  key = makeWorldKey(x, y, z)
+  val = volume[key]
+  if val == nil then
+    return default
+  end
+  return val
+end
+
+-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+-- Our local representation of the world
+
+local FACING = { "NORTH", "EAST", "SOUTH", "WEST", NORTH = 1, EAST = 2, SOUTH = 3, WEST = 4 }
+
+
+local function getBlock(world, x, y, z)
+  -- < 0 is   STONE_BLOCK
+  -- 1-10 is  LOG_BLOCK
+  -- > 10 is  NO_BLOCK
+
+  local default = 0
+  if y < 0 then
+    default = STONE_BLOCK
+  elseif y < 11 then
+    default = WOOD_BLOCK
+  end
+
+  return getVoxel(world, x, y, z, default)
+end
+
+local function clearCurrentBlock(world)
+  local x, y, z = world.getLocation()
+  setVoxel(world.vol, x, y, z, 0)
+end
+
+local function left(world)
+  local facing = world.facing
+  facing = facing - 1
+  if facing < 1 then
+    facing = 4
+  end
+  world.facing = facing
+end
+
+
+local function right(world)
+  local facing = world.facing
+  facing = facing + 1
+  if facing > 4 then
+    facing = 1
+  end
+  world.facing = facing
+end
+
+
+local function forBack(world, qty)
+  local facing = world.facing
+  local x = world.x
+  local z = world.z
+  if facing == 1 then
+    z = z - qty
+  elseif facing == 2 then
+    x = x + qty
+  elseif facing == 3 then
+    z = z + qty
+  else
+    x = x - qty
+  end
+
+  world.x = x
+  world.z = z
+end
+
+local function upDown(world, qty)
+  world.y = world.y + qty
+end
+
+
+local function getLocationFront(world)
+  local facing = world.facing
+  local x, y, z = world.getLocation()
+  if facing == 1 then
+    z = z - qty
+  elseif facing == 2 then
+    x = x + qty
+  elseif facing == 3 then
+    z = z + qty
+  else
+    x = x - qty
+  end
+  return x, y, z
+end
+
+
+local function dumpWorld(world)
+  for k,v in pairs(world.vol) do
+    print(k.." - "..tostring(v))
+  end
+  print("facing: "..world.facing)
+  print("x,y,z: "..world.x..","..world.y..","..world.z)
+end
+
+-- Constructs the gWorld object
+
+-- TODO:  Add hit detection
+-- TODO:  Add code for generating trees and other shapes
+-- TODO:  Add code for initializing location, layers, etc.
+
+function initWorld()
+  local world      = { vol = {}, facing = 1, x = 0, y = 0, z = 0 }
+  world.getBlock   = function (x,y,z) return getBlock(world.vol, x, y, z) end
+  world.setBlock   = function (x,y,z, id) return setVoxel(world.vol, x, y, z, id) end
+  world.dump       = function() dumpWorld(world) end
+  world.getLocation = function() return world.x, world.y, world.z end
+  world.setBlock(0, 0, 0, 0)
+
+  return world
+end
+
+
+-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+-- Construct TurtleSim object to pass back
 local turtleSim = {
   fuel = 0;
-  block = true;
-  blockDown = true;
-  blockUp = true;
   selectNum = 1;
-  x = 0;
-  y = 0;
-  z = 0;
+
+  world = initWorld()
 }
+
+
+-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 
 -- Loads the file
 function tsLoadFile(path)
@@ -52,85 +217,44 @@ function turtleSim.loadCrush()
 end
 
 
-MAX_X =  100;
-MIN_X = -100;
-MAX_Y =  10;
-MIN_Y = -100;
-MAX_Z =  100;
-MIN_Z = -100;
 
--- Generate a "random world."
-
--- UGH!  We need to keep track of facing...
-function turtleSim.makeWorld()
-  local arr = {}
-  for x = MIN_X, MAX_X do
-    local xArr = {}
-    arr[x] = xArr
-    for y = MIN_Y, MAX_Y do
-      local yArr = {}
-      xArr[y] = yArr
-      for z = MIN_Z, MAX_Z do
-        -- Here is where we put in the actual value
-
-        if y < 0 then
-          --yArr[z] = 1 -- 1 is a block ID 1
-          yArr[z] = "dirt" -- 1 is a block ID 1
-        else
-          yArr[z] = "air" -- 0 is air
-        end
-        
-      end
-    end
-  end
-  return arr
-end
-
-turtleSim.world = turtleSim.makeWorld()
-
---
-
+-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 function turtleSim.forward()
   io.write("f")
-  turtleSim.block = true
-  turtleSim.blockDown = true
-  turtleSim.blockUp = true
+  forBack(turtleSim.world, 1)
+  clearCurrentBlock(turtleSim.world)
   turtleSim.fuel = turtleSim.fuel - 1
 end
 
 function turtleSim.back()
   io.write("b")
+  forBack(turtleSim.world, -1)
+  clearCurrentBlock(turtleSim.world)
   turtleSim.fuel = turtleSim.fuel - 1
 end
 
 function turtleSim.turnLeft()
   io.write("l")
-  turtleSim.block = true
+  left(turtleSim.world)
   turtleSim.fuel = turtleSim.fuel - 1
 end
 
 function turtleSim.turnRight()
   io.write("r")
-  turtleSim.block = true
+  right(turtleSim.world)
   turtleSim.fuel = turtleSim.fuel - 1
 end
 
 function turtleSim.up()
   io.write("u")
-  turtleSim.y = turtleSim.y + 1
-  turtleSim.block = inRange(turtleSim.y, MIN_Y, MAX_Y)
-  turtleSim.blockUp = inRange(turtleSim.y + 1, MIN_Y, MAX_Y)
-  turtleSim.blockDown = inRange(turtleSim.y - 1, MIN_Y, MAX_Y)
+  upDown(turtleSim.world(), 1)
   turtleSim.fuel = turtleSim.fuel - 1
 end
 
 function turtleSim.down()
   io.write("d")
-  turtleSim.y = turtleSim.y - 1
-  turtleSim.block = inRange(turtleSim.y, MIN_Y, MAX_Y)
-  turtleSim.blockUp = inRange(turtleSim.y + 1, MIN_Y, MAX_Y)
-  turtleSim.blockDown = inRange(turtleSim.y - 1, MIN_Y, MAX_Y)
+  upDown(turtleSim.world(), -1)
   turtleSim.fuel = turtleSim.fuel - 1
 end
 
@@ -153,78 +277,93 @@ end
 
 function turtleSim.detect()
   io.write("!f")
-  return turtleSim.block
+  local x, y, z = turtleSim.world.getLocationFront(world)
+  return getBlockAt(turtleSim.world, x, y, z) ~= 0
 end
 
 function turtleSim.detectDown()
   io.write("!\\")
-  return turtleSim.blockDown
+  local x = turtleSim.world.x
+  local y = turtleSim.world.y + 1
+  local z = turtleSim.world.z
+  return turtleSim.getBlockAt(world, x, y, z) ~= 0
 end
 
 function turtleSim.detectUp()
   io.write("!/")
-  return turtleSim.blockUp
+  local x = turtleSim.world.x
+  local y = turtleSim.world.y - 1
+  local z = turtleSim.world.z
+  return getBlockAt(turtleSim.world, x, y, z) ~= 0
 end
 
 
 function turtleSim.dig()
   io.write("x")
-  turtleSim.block = false
+  local x,y,z = getLocationFront(turtleSim.world)
+  turtle.world.setBlock(x,y,z,0)
 end
 
 function turtleSim.digDown()
-  turtleSim.blockDown = false
+  local x,y,z = turtleSim.world.getLocation()
+  y = y - 1
+  turtle.world.setBlock(x,y,z,0)
   io.write("_")
 end
 
 function turtleSim.digUp()
-  turtleSim.blockUp = false
+  local x,y,z = turtleSim.world.getLocation()
+  y = y + 1
+  turtle.world.setBlock(x,y,z,0)
   io.write("^")
 end
 
 
 function turtleSim.place()
+  -- TODO: Simulate inventory
+  local x,y,z = getLocationFront(turtleSim.world)
+  turtle.world.setBlock(x,y,z,1)
   print("placing idx: "..turtleSim.selectNum)
 end
 
 function turtleSim.placeDown()
+  -- TODO: Simulate inventory
+  local x,y,z = turtleSim.world.getLocation()
+  y = y - 1
+  turtle.world.setBlock(x,y,z,1)
   print("placeDown idx: "..turtleSim.selectNum)
 end
 
 function turtleSim.placeUp()
+  -- TODO: Simulate inventory
+  local x,y,z = turtleSim.world.getLocation()
+  y = y + 1
+  turtle.world.setBlock(x,y,z,1)
   print("placeUp idx: "..turtleSim.selectNum)
 end
 
 
 
 function turtleSim.compare()
-  print("compare")
-  if turtleSim.selectNum == 6 then
-    return true
-  end
-  return false
+  -- TODO
+  return false;
 end
 
 function turtleSim.compareDown()
-  print("compareDown")
-  if turtleSim.selectNum == 7 then
-    return true
-  end
-  return false
+  -- TODO
+  return false;
 end
 
 function turtleSim.compareUp()
-  print("compareUp")
-  if turtleSim.selectNum == 5 then
-    return true
-  end
-  return false
+  -- TODO
+  return false;
 end
 
 
 -- Utilities
 
 function turtleSim.getItemCount(slot)
+  -- TODO: Simulate inventory
   return 2
 end
 
@@ -237,5 +376,8 @@ end
 
 
 -- Return the Object so they can access it.
+
+
+
 
 return turtleSim
