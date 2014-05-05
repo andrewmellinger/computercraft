@@ -57,12 +57,10 @@ function nextRow(height, right)
   if right then
     turtle.turnRight()
     digIt(height)
-    turtle.forward()
     turtle.turnRight()
   else
     turtle.turnLeft()
     digIt(height)
-    turtle.forward()
     turtle.turnLeft()
   end
   return not right

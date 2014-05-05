@@ -73,8 +73,6 @@ function chopTree(size, count, spacing)
   -- Vizzini says: Back to the beginning!
   if size == 2 then
     crush.ccts("*f*fr*fr")
-  else
-    crush.ccts("bb")
   end
 
   -- We always chop down at least one
